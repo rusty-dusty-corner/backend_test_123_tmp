@@ -3,6 +3,8 @@ import { FastifyInstance, FastifyPluginAsync, FastifyReply, FastifyRequest } fro
 import Big from 'big.js';
 import { query } from '../db.js';
 import { TokenValidationError, validateAndParseToken } from '../token.js';
+import { computeEtag } from '../etag.js';
+import { normalizeForEtag } from '../time.js';
 
 type PublicWatcherParams = {
   token: string;
@@ -83,7 +85,13 @@ async function handleRequest(
 
   const workers = await findWorkers(link.user_id);
   const responseBody = buildResponse(workers);
+  const etag = buildEtag(responseBody);
   const ifNoneMatch = request.headers['if-none-match'];
+
+  reply.header('ETag', etag);
+  if (ifNoneMatch === etag) {
+    return reply.status(304).send();
+  }
 
   return reply.status(200).send(responseBody);
 }
@@ -177,6 +185,20 @@ function buildResponse(workers: WorkerRow[]): PublicWatcherResponse {
     workers: workerResponses,
     agg,
   };
+}
+
+function buildEtag(response: PublicWatcherResponse): string {
+  const normalizedWorkers = response.workers.map((worker) => ({
+    ...worker,
+    last_seen_at: normalizeForEtag(worker.last_seen_at),
+  }));
+
+  const subject = {
+    workers: normalizedWorkers,
+    agg: response.agg,
+  };
+
+  return computeEtag(subject);
 }
 
 export default fp(plugin, {
