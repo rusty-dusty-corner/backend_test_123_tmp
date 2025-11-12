@@ -18,6 +18,9 @@ format:
 format-check:
 	npm run format:check
 
+migrate:
+	npm run migrate
+
 compose-up:
 	docker compose up --build
 
