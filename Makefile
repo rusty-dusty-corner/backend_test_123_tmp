@@ -12,6 +12,12 @@ build:
 start:
 	npm start
 
+format:
+	npm run format
+
+format-check:
+	npm run format:check
+
 compose-up:
 	docker compose up --build
 
