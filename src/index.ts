@@ -1,5 +1,6 @@
 import fastify from 'fastify';
 import { randomUUID } from 'crypto';
+import { pool } from './db.js';
 
 async function main() {
   const app = fastify({
