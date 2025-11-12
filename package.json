@@ -1,0 +1,27 @@
+{
+  "name": "backend-gauntlet",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "big.js": "^6.2.1",
+    "bs58": "^6.0.0",
+    "dotenv": "^16.4.5",
+    "fastify": "^4.27.2",
+    "fastify-plugin": "^4.5.1",
+    "pino": "^9.3.1",
+    "pg": "^8.12.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.4",
+    "pino-pretty": "^11.2.2",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.3"
+  }
+}
+
