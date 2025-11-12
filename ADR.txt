@@ -1,0 +1,11 @@
+We are building a backend service to satisfy the watcher-link assignment. Requirements stress security, correctness, raw SQL migrations, canonical ETags, per-token rate limits, and Docker-based delivery. Also provide developer ergonomics (formatters, presets).
+
+Use Fastify with TypeScript for the HTTP layer to get structured logging, hooks, and JSON I/O while retaining type safety.
+Manage configuration via environment variables (`config.ts`) and inject dependencies like rate limiters and DB pools.
+Connect to Postgres through the `pg` client only; raw SQL migrations executed by a lightweight TypeScript runner (`scripts/migrate.ts`).
+Implement watcher route logic: Base58Check token validation, worker queries, sorted aggregates, canonical JSON hashing (`etag.ts`), and in-memory rate limiting (`rateLimiter.ts`).
+Package everything with Docker/Docker Compose so migrations run before the app boots; provide a mock data seeder (`scripts/mockData.ts`) behind a compose profile.
+Maintain code quality with Prettier scripts wired through npm and the Makefile.
+
+Developer experience improves via consistent formatting and Make targets. In-memory rate limiting is simple. Manual canonicalisation and token utilities. Simple mock data generation.
+
