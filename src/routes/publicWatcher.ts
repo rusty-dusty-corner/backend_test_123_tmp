@@ -2,6 +2,7 @@ import fp from 'fastify-plugin';
 import { FastifyInstance, FastifyPluginAsync, FastifyReply, FastifyRequest } from 'fastify';
 import Big from 'big.js';
 import { query } from '../db.js';
+import { TokenRateLimiter } from '../rateLimiter.js';
 import { TokenValidationError, validateAndParseToken } from '../token.js';
 import { computeEtag } from '../etag.js';
 import { normalizeForEtag } from '../time.js';
@@ -46,7 +47,7 @@ type PublicWatcherResponse = {
 };
 
 export interface PublicWatcherPluginOptions {
-  rateLimiter: 'dummy';
+  rateLimiter: TokenRateLimiter;
 }
 
 const plugin: FastifyPluginAsync<PublicWatcherPluginOptions> = async (fastify, options) => {
@@ -61,7 +62,7 @@ async function handleRequest(
   fastify: FastifyInstance,
   request: FastifyRequest<{ Params: PublicWatcherParams }>,
   reply: FastifyReply,
-  rateLimiter: 'dummy',
+  rateLimiter: TokenRateLimiter,
 ) {
   const token = request.params.token;
   let payloadHash: Buffer;
@@ -76,6 +77,14 @@ async function handleRequest(
     }
     fastify.log.error({ err: error }, 'Unexpected token validation failure');
     return reply.status(500).send();
+  }
+
+  const limiterKey = payloadHash.toString('hex');
+  if (!rateLimiter.consume(limiterKey)) {
+    return reply.status(429).send({
+      error: 'rate_limited',
+      message: 'Too many requests for this token',
+    });
   }
 
   const link = await findValidWatcherLink(payloadHash);
