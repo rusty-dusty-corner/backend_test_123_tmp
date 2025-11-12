@@ -1,6 +1,7 @@
 import fastify from 'fastify';
 import { randomUUID } from 'crypto';
 import { pool } from './db.js';
+import publicWatcherPlugin from './routes/publicWatcher.js';
 
 async function main() {
   const app = fastify({
@@ -13,6 +14,12 @@ async function main() {
 
   app.get('/health', async () => {
     return { status: 'ok' };
+  });
+
+  const rateLimiter = 'dummy';
+
+  await app.register(publicWatcherPlugin, {
+    rateLimiter,
   });
 
   try {
